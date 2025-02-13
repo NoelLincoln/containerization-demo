@@ -1,0 +1,41 @@
+# Deployment configuration for the MongoDB database
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: database  # Name of the deployment
+spec:
+  replicas: 1  # Running a single instance for demonstration
+  selector:
+    matchLabels:
+      app: database  # Ensures the pod matches this label
+  template:
+    metadata:
+      labels:
+        app: database  # Labels assigned to the pod for identification
+    spec:
+      containers:
+      - name: database
+        image: mongo:latest  # Uses the latest MongoDB image from Docker Hub
+        ports:
+        - containerPort: 27017  # MongoDB default port
+        volumeMounts:
+        - name: mongo-storage  # Attach the volume for persistent data storage
+          mountPath: /data/db  # Directory inside the container to store MongoDB data
+      volumes:
+      - name: mongo-storage
+        emptyDir: {}  # Temporary storage that resets when the pod restarts
+
+---
+# Service configuration to expose the database within the cluster
+apiVersion: v1
+kind: Service
+metadata:
+  name: database  # Name of the service
+spec:
+  selector:
+    app: database  # Routes traffic to pods with this label
+  ports:
+    - protocol: TCP
+      port: 27017  # Exposed service port inside the cluster
+      targetPort: 27017  # Port on the container
+  type: ClusterIP  # Internal service, accessible only within the cluster
