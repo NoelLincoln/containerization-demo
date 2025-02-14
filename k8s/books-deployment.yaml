@@ -1,0 +1,35 @@
+# Deployment configuration for the Books Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: books-service  # Name of the deployment
+spec:
+  replicas: 1  # Running a single instance for demonstration purposes
+  selector:
+    matchLabels:
+      app: books-service  # Ensures that the pod matches this label
+  template:
+    metadata:
+      labels:
+        app: books-service  # Labels assigned to the pod for identification
+    spec:
+      containers:
+      - name: books-service
+        image: containerization-demo-books-service-1  # Use the locally built image
+        ports:
+        - containerPort: 4001  # Port the container listens on
+
+---
+# Service configuration for exposing the Books Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: books-service  # Name of the service
+spec:
+  selector:
+    app: books-service  # Routes traffic to pods with this label
+  ports:
+    - protocol: TCP
+      port: 4001  # Exposed service port inside the cluster
+      targetPort: 4001  # Port on the container
+  type: ClusterIP  # Internal service, accessible only within the cluster

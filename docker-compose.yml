@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "3000:3000"
+    depends_on:
+      - books-service
+      - users-service
+    networks:
+      - bookstore-network
+
+  books-service:
+    build: ./books-service
+    ports:
+      - "4001:4001"
+    depends_on:
+      - database
+    networks:
+      - bookstore-network
+
+  users-service:
+    build: ./users-service
+    ports:
+      - "4002:4002"
+    depends_on:
+      - database
+    networks:
+      - bookstore-network
+
+  database:
+    image: mongo
+    container_name: mongo-db
+    ports:
+      - "27017:27017"
+    networks:
+      - bookstore-network
+
+networks:
+  bookstore-network:
+    driver: bridge
