@@ -2,40 +2,51 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: database  # Name of the deployment
+  name: database
 spec:
-  replicas: 1  # Running a single instance for demonstration
+  replicas: 1
   selector:
     matchLabels:
-      app: database  # Ensures the pod matches this label
+      app: database
   template:
     metadata:
       labels:
-        app: database  # Labels assigned to the pod for identification
+        app: database
     spec:
       containers:
       - name: database
-        image: mongo:latest  # Uses the latest MongoDB image from Docker Hub
+        image: mongo:latest
         ports:
-        - containerPort: 27017  # MongoDB default port
+        - containerPort: 27017
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-secret
+              key: MONGO_INITDB_ROOT_USERNAME
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-secret
+              key: MONGO_INITDB_ROOT_PASSWORD
         volumeMounts:
-        - name: mongo-storage  # Attach the volume for persistent data storage
-          mountPath: /data/db  # Directory inside the container to store MongoDB data
+        - name: mongo-storage
+          mountPath: /data/db
       volumes:
       - name: mongo-storage
-        emptyDir: {}  # Temporary storage that resets when the pod restarts
+        emptyDir: {}  # Temporary storage
 
 ---
-# Service configuration to expose the database within the cluster
+# Service configuration for MongoDB
 apiVersion: v1
 kind: Service
 metadata:
-  name: database  # Name of the service
+  name: database
 spec:
   selector:
-    app: database  # Routes traffic to pods with this label
+    app: database
   ports:
     - protocol: TCP
-      port: 27017  # Exposed service port inside the cluster
-      targetPort: 27017  # Port on the container
-  type: ClusterIP  # Internal service, accessible only within the cluster
+      port: 27017
+      targetPort: 27017
+  type: ClusterIP
